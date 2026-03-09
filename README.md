@@ -5,7 +5,11 @@
 2026년, 공개 GitHub 커밋의 ~4%가 AI가 작성한 것이며, 연말까지 20%에 도달할 전망입니다.
 `git-forensic`은 **"우리 레포의 AI 코드 품질은 몇 점인가?"** 라는 질문에 답합니다.
 
-![Dashboard](https://raw.githubusercontent.com/hyunseung1119/forensic/main/report-screenshot.png)
+### 대시보드 — 품질 트렌드 & 파일 타입 분석
+![Dashboard Overview](https://raw.githubusercontent.com/hyunseung1119/forensic/main/report-screenshot.png)
+
+### 커밋별 품질 점수 상세
+![Commit Table](https://raw.githubusercontent.com/hyunseung1119/forensic/main/report-screenshot-table.png)
 
 ---
 

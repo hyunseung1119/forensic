@@ -261,6 +261,7 @@
     background: var(--bg);
     padding: 2px 8px;
     border: 1px solid var(--border);
+    white-space: nowrap;
   }
   .grade-tag {
     display: inline-block;
@@ -413,9 +414,9 @@
       </div>
 
       <div class="section-label" style="margin-top:28px">Models</div>
-      <ul class="model-list">
-        <li><span>Claude Opus</span><span class="model-count">7</span></li><li><span>Claude Sonnet</span><span class="model-count">5</span></li>
-      </ul>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+        <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--border);font-size:13px"><span>Claude Opus</span><strong style="font-family:JetBrains Mono,monospace;color:var(--ink)">7</strong></span><span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--border);font-size:13px"><span>Claude Sonnet</span><strong style="font-family:JetBrains Mono,monospace;color:var(--ink)">5</strong></span>
+      </div>
 
       <div class="section-label" style="margin-top:28px">Confidence</div>
       <ul class="conf-list">

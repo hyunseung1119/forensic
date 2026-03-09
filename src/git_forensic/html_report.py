@@ -337,6 +337,7 @@ def generate_html(
     background: var(--bg);
     padding: 2px 8px;
     border: 1px solid var(--border);
+    white-space: nowrap;
   }}
   .grade-tag {{
     display: inline-block;
@@ -465,9 +466,9 @@ def generate_html(
       </div>
 
       <div class="section-label" style="margin-top:28px">Models</div>
-      <ul class="model-list">
-        {"".join(f'<li><span>{m}</span><span class="model-count">{c}</span></li>' for m, c in model_counts.most_common())}
-      </ul>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+        {"".join(f'<span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--border);font-size:13px"><span>{m}</span><strong style="font-family:JetBrains Mono,monospace;color:var(--ink)">{c}</strong></span>' for m, c in model_counts.most_common())}
+      </div>
 
       <div class="section-label" style="margin-top:28px">Confidence</div>
       <ul class="conf-list">
