@@ -33,6 +33,7 @@ from git_forensic.scorer import score_detection
 @click.option("--json-out", "-o", help="Export results to JSON file")
 @click.option("--html", "-h", "html_out", help="Export HTML dashboard report")
 @click.option("--open", "auto_open", is_flag=True, help="Auto-open HTML report in browser")
+@click.option("--name", "repo_display_name", help="Custom repository name for reports")
 @click.option("--all-commits", is_flag=True, help="Show all commits including low confidence")
 def main(
     repo_path: str,
@@ -43,6 +44,7 @@ def main(
     json_out: str | None,
     html_out: str | None,
     auto_open: bool,
+    repo_display_name: str | None,
     all_commits: bool,
 ) -> None:
     """Audit AI-authored code quality in git repositories.
@@ -113,7 +115,7 @@ def main(
     # HTML export
     if html_out:
         from git_forensic.html_report import export_html
-        repo_name = repo.name
+        repo_name = repo_display_name or repo.name
         export_html(detections, scores, total_commits, html_out, repo_name)
         console.print(f"[green]✓[/green] HTML dashboard exported to {html_out}")
         if auto_open:
