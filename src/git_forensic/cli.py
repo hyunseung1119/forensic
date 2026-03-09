@@ -31,6 +31,8 @@ from git_forensic.scorer import score_detection
 @click.option("--min-confidence", "-c", default=0.5, help="Minimum confidence threshold (0-1)")
 @click.option("--limit", "-n", default=30, help="Max commits to display")
 @click.option("--json-out", "-o", help="Export results to JSON file")
+@click.option("--html", "-h", "html_out", help="Export HTML dashboard report")
+@click.option("--open", "auto_open", is_flag=True, help="Auto-open HTML report in browser")
 @click.option("--all-commits", is_flag=True, help="Show all commits including low confidence")
 def main(
     repo_path: str,
@@ -39,19 +41,22 @@ def main(
     min_confidence: float,
     limit: int,
     json_out: str | None,
+    html_out: str | None,
+    auto_open: bool,
     all_commits: bool,
 ) -> None:
-    """🔍 Audit AI-authored code quality in git repositories.
+    """Audit AI-authored code quality in git repositories.
 
     Scans commit history for AI authorship signals (Co-Authored-By, etc.)
     and scores code quality across multiple dimensions.
 
     \b
     Examples:
-        git-forensic .                     # Scan current repo
-        git-forensic /path/to/repo         # Scan specific repo
-        git-forensic . --since 2026-01     # Only recent commits
-        git-forensic . -o report.json      # Export JSON report
+        git-forensic .                          # Scan current repo
+        git-forensic /path/to/repo              # Scan specific repo
+        git-forensic . --since 2026-01          # Only recent commits
+        git-forensic . -o report.json           # Export JSON report
+        git-forensic . -h report.html --open    # HTML dashboard + open
     """
     console = Console(force_terminal=True)
 
@@ -103,7 +108,17 @@ def main(
     # JSON export
     if json_out:
         export_json(detections, scores, total_commits, json_out)
-        console.print(f"\n[green]✓[/green] Report exported to {json_out}")
+        console.print(f"\n[green]✓[/green] JSON report exported to {json_out}")
+
+    # HTML export
+    if html_out:
+        from git_forensic.html_report import export_html
+        repo_name = repo.name
+        export_html(detections, scores, total_commits, html_out, repo_name)
+        console.print(f"[green]✓[/green] HTML dashboard exported to {html_out}")
+        if auto_open:
+            import webbrowser
+            webbrowser.open(str(Path(html_out).resolve()))
 
     console.print()
 
