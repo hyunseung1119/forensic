@@ -15,56 +15,34 @@
 
 ## 설치 방법
 
-### macOS / Linux
+### PyPI (추천)
 
 ```bash
-# 1. uv 설치 (미설치 시)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# 2. 설치 없이 바로 실행
+# uv 사용 — 설치 없이 바로 실행
 uvx git-forensic /path/to/repo
 
-# 또는 전역 설치 후 실행
+# 또는 전역 설치
 uv tool install git-forensic
-git-forensic /path/to/repo
+pip install git-forensic
 ```
 
-### Windows (PowerShell)
-
-```powershell
-# 1. uv 설치
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-
-# 2. 터미널 재시작 후:
-uvx git-forensic C:\path\to\repo
-
-# 또는 전역 설치 후 실행
-uv tool install git-forensic
-git-forensic C:\path\to\repo
-```
-
-### Windows (CMD)
-
-```cmd
-:: 1. uv 설치
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-
-:: 2. CMD 재시작 후:
-uvx git-forensic C:\path\to\repo
-
-:: 또는 전역 설치 후 실행
-uv tool install git-forensic
-git-forensic C:\path\to\repo
-```
-
-### pip (모든 플랫폼)
+### GitHub에서 직접 설치
 
 ```bash
-pip install git-forensic
-git-forensic /path/to/repo
+pip install git+https://github.com/hyunseung1119/forensic.git
 ```
 
-> **요구사항:** Python 3.11 이상, Git이 설치되어 PATH에 등록되어 있어야 합니다.
+### uv 미설치 시
+
+```bash
+# macOS / Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+> **요구사항:** Python 3.11 이상, Git이 PATH에 등록되어 있어야 합니다.
 
 ---
 
