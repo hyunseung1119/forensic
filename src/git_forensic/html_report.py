@@ -430,12 +430,23 @@ def generate_html(
     </div>
     <div>
       <div class="section-label">Composition</div>
-      <div class="comp-row">
-        <span class="comp-label">AI vs Human</span>
-        <div class="comp-bar-wrap">
-          <div class="comp-fill" style="width:{max(ai_ratio, 8)}%">{ai_ratio}%</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="comp-label">AI</span>
+        <div style="flex:1;position:relative">
+          <div class="comp-bar-wrap">
+            <div class="comp-fill" style="width:{max(ai_ratio, 3)}%"></div>
+          </div>
         </div>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary);min-width:48px;text-align:right">{ai_ratio}%</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--ink);min-width:56px;text-align:right">{ai_ratio}%</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+        <span class="comp-label">Human</span>
+        <div style="flex:1;position:relative">
+          <div class="comp-bar-wrap">
+            <div style="height:100%;background:var(--text-tertiary);width:{100 - ai_ratio}%"></div>
+          </div>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--ink);min-width:56px;text-align:right">{100 - ai_ratio}%</span>
       </div>
 
       <div class="section-label" style="margin-top:28px">Models</div>
