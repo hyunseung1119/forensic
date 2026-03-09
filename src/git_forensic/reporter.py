@@ -37,9 +37,10 @@ def render_summary(
     model_str = " | ".join(f"{m}: {c}" for m, c in model_counts.most_common(5))
 
     # Confidence distribution
-    confirmed = sum(1 for d in detections if d.confidence >= 0.9)
-    high = sum(1 for d in detections if 0.7 <= d.confidence < 0.9)
+    confirmed = sum(1 for d in detections if d.is_confirmed)
+    high = sum(1 for d in detections if 0.7 <= d.confidence < 0.9 and not d.is_confirmed)
     medium = sum(1 for d in detections if 0.5 <= d.confidence < 0.7)
+    heuristic = sum(1 for d in detections if d.confidence < 0.5)
 
     summary = Text()
     summary.append("📊 Repository AI Audit Summary\n\n", style="bold cyan")
@@ -49,7 +50,11 @@ def render_summary(
     summary.append(f"  AI Lines Removed: -{total_deletions:,}\n", style="red")
     summary.append(f"\n  Quality Grade:    {avg_grade} ({avg_score:.1f}/100)\n", style=f"bold {_grade_color(avg_grade)}")
     summary.append(f"\n  Models:           {model_str}\n")
-    summary.append(f"  Confidence:       ✅ {confirmed} confirmed | 🔶 {high} high | 🔸 {medium} medium\n")
+    conf_parts = [f"✅ {confirmed} confirmed"]
+    if high: conf_parts.append(f"🔶 {high} high")
+    if medium: conf_parts.append(f"🔸 {medium} medium")
+    if heuristic: conf_parts.append(f"⚪ {heuristic} heuristic")
+    summary.append(f"  Confidence:       {' | '.join(conf_parts)}\n")
 
     console.print(Panel(summary, title="[bold]🔍 git-forensic[/bold]", border_style="blue"))
 

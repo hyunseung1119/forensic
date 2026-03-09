@@ -27,9 +27,23 @@ def generate_html(
     total_del = sum(d.deletions for d in detections)
 
     model_counts = Counter(d.ai_model for d in detections)
-    confirmed = sum(1 for d in detections if d.confidence >= 0.9)
-    high = sum(1 for d in detections if 0.7 <= d.confidence < 0.9)
+    confirmed = sum(1 for d in detections if d.is_confirmed)
+    high = sum(1 for d in detections if 0.7 <= d.confidence < 0.9 and not d.is_confirmed)
     medium = sum(1 for d in detections if 0.5 <= d.confidence < 0.7)
+    heuristic = sum(1 for d in detections if d.confidence < 0.5)
+
+    # File type aggregation
+    all_file_types: Counter = Counter()
+    for d in detections:
+        for ext, count in d.file_types.items():
+            all_file_types[ext] += count
+
+    # Timeline: date → avg score
+    date_scores: dict[str, list[float]] = {}
+    for d, s in zip(detections, scores):
+        date_scores.setdefault(d.date, []).append(s.overall)
+    timeline_dates = sorted(date_scores.keys())
+    timeline_avgs = [round(sum(date_scores[dt]) / len(date_scores[dt]), 1) for dt in timeline_dates]
 
     avg_msg = round(sum(s.commit_message for s in scores) / len(scores), 1) if scores else 0
     avg_size = round(sum(s.change_size for s in scores) / len(scores), 1) if scores else 0
@@ -48,6 +62,7 @@ def generate_html(
             "grade": s.grade,
             "score": s.overall,
             "confidence": round(d.confidence * 100),
+            "conf_label": d.confidence_label,
             "files": d.files_changed,
             "insertions": d.insertions,
             "deletions": d.deletions,
@@ -388,7 +403,7 @@ def generate_html(
   <header class="masthead">
     <div class="overline">AI Code Quality Audit Report</div>
     <h1>{repo_name}</h1>
-    <div class="subtitle">168 commits analyzed &middot; {ai_count} AI-authored &middot; {len(set(d.ai_model for d in detections))} model(s) detected</div>
+    <div class="subtitle">{total_commits} commits analyzed &middot; {ai_count} AI-authored &middot; {len(set(d.ai_model for d in detections))} model(s) detected</div>
     <div class="grade-pill">Grade {grade} &mdash; {avg_score} / 100</div>
   </header>
 
@@ -456,9 +471,24 @@ def generate_html(
 
       <div class="section-label" style="margin-top:28px">Confidence</div>
       <ul class="conf-list">
-        <li><div class="conf-dot" style="background:var(--green)"></div> Confirmed <strong style="margin-left:auto">{confirmed}</strong></li>
-        <li><div class="conf-dot" style="background:var(--amber)"></div> High <strong style="margin-left:auto">{high}</strong></li>
-        <li><div class="conf-dot" style="background:var(--text-tertiary)"></div> Medium <strong style="margin-left:auto">{medium}</strong></li>
+        <li><div class="conf-dot" style="background:var(--green)"></div> Confirmed (Co-Author tag) <strong style="margin-left:auto">{confirmed}</strong></li>
+        {"" if not high else f'<li><div class="conf-dot" style="background:var(--amber)"></div> High <strong style="margin-left:auto">{high}</strong></li>'}
+        {"" if not medium else f'<li><div class="conf-dot" style="background:var(--text-tertiary)"></div> Medium <strong style="margin-left:auto">{medium}</strong></li>'}
+        {"" if not heuristic else f'<li><div class="conf-dot" style="background:var(--border)"></div> Heuristic (pattern only) <strong style="margin-left:auto">{heuristic}</strong></li>'}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Trend + File Types -->
+  <div class="two-col">
+    <div>
+      <div class="section-label">Quality Trend</div>
+      <div id="trend-chart" style="position:relative;height:180px;border:1px solid var(--border);padding:16px;overflow:hidden"></div>
+    </div>
+    <div>
+      <div class="section-label">File Types Modified by AI</div>
+      <ul class="model-list">
+        {"".join(f'<li><span><code>{ext}</code></span><span class="model-count">{cnt}</span></li>' for ext, cnt in all_file_types.most_common(10))}
       </ul>
     </div>
   </div>
@@ -494,7 +524,7 @@ const commits = {commits_data};
 const tbody = document.getElementById('commits-body');
 commits.forEach(c => {{
   const gc = c.score >= 80 ? 'g-high' : (c.score >= 60 ? 'g-mid' : 'g-low');
-  const confTxt = c.confidence >= 90 ? 'confirmed' : (c.confidence >= 70 ? 'high' : 'medium');
+  const confTxt = c.conf_label;
   tbody.innerHTML += `<tr>
     <td>${{c.date}}</td>
     <td><span class="hash-link">${{c.hash}}</span></td>
@@ -514,6 +544,29 @@ commits.forEach(c => {{
     <td><span class="conf-badge">${{confTxt}}</span></td>
   </tr>`;
 }});
+
+// Trend chart — pure CSS/JS bar chart
+const trendDates = {json.dumps(timeline_dates)};
+const trendAvgs = {json.dumps(timeline_avgs)};
+const chart = document.getElementById('trend-chart');
+if (trendDates.length > 0) {{
+  const maxScore = 100;
+  const barWidth = Math.max(20, Math.min(60, (chart.clientWidth - 40) / trendDates.length - 4));
+  let html = '<div style="display:flex;align-items:flex-end;gap:4px;height:140px;padding-top:8px">';
+  trendAvgs.forEach((score, i) => {{
+    const h = Math.max(4, (score / maxScore) * 130);
+    const color = score >= 80 ? '#15803d' : (score >= 60 ? '#b45309' : '#dc2626');
+    html += `<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:${{barWidth}}px">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#78716c;margin-bottom:2px">${{score}}</span>
+      <div style="width:100%;max-width:${{barWidth}}px;height:${{h}}px;background:${{color}}"></div>
+      <span style="font-size:10px;color:#a8a29e;margin-top:4px;white-space:nowrap">${{trendDates[i].slice(5)}}</span>
+    </div>`;
+  }});
+  html += '</div>';
+  chart.innerHTML = html;
+}} else {{
+  chart.innerHTML = '<p style="color:#a8a29e;text-align:center;padding-top:60px">Not enough data for trend</p>';
+}}
 </script>
 </body>
 </html>"""

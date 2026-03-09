@@ -42,10 +42,16 @@ class AIDetection:
     files_changed: int = 0
     insertions: int = 0
     deletions: int = 0
+    is_initial_commit: bool = False
+    file_types: dict[str, int] = field(default_factory=dict)  # {".ts": 5, ".py": 3}
 
     @property
     def is_ai(self) -> bool:
         return self.confidence >= 0.5
+
+    @property
+    def is_confirmed(self) -> bool:
+        return self.confidence >= 0.9 and "heuristic-only" not in self.signals
 
     @property
     def confidence_label(self) -> str:
@@ -55,7 +61,9 @@ class AIDetection:
             return "high"
         if self.confidence >= 0.5:
             return "medium"
-        return "low"
+        if self.confidence > 0:
+            return "heuristic"
+        return "none"
 
 
 def extract_ai_model(text: str) -> str:
@@ -102,14 +110,25 @@ def detect_commit(commit: Commit) -> AIDetection:
         if heuristic_score > 0:
             signals.append("heuristic-only")
 
-    # Extract stats
+    # Extract stats and file types
     try:
         stats = commit.stats.total
         files_changed = stats.get("files", 0)
         insertions = stats.get("insertions", 0)
         deletions = stats.get("deletions", 0)
+
+        # File type distribution
+        import os
+        file_types: dict[str, int] = {}
+        for fpath in commit.stats.files:
+            ext = os.path.splitext(fpath)[1].lower() or "(no ext)"
+            file_types[ext] = file_types.get(ext, 0) + 1
     except Exception:
         files_changed = insertions = deletions = 0
+        file_types = {}
+
+    # Detect initial commit (no parents)
+    is_initial = len(commit.parents) == 0
 
     return AIDetection(
         commit_hash=commit.hexsha,
@@ -123,6 +142,8 @@ def detect_commit(commit: Commit) -> AIDetection:
         files_changed=files_changed,
         insertions=insertions,
         deletions=deletions,
+        is_initial_commit=is_initial,
+        file_types=file_types,
     )
 
 

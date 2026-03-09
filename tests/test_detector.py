@@ -1,18 +1,21 @@
 """Tests for AI commit detection engine."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, PropertyMock
 from datetime import datetime, timezone
 
 from git_forensic.detector import detect_commit, extract_ai_model
 
 
-def _make_commit(message: str, author: str = "dev") -> MagicMock:
+def _make_commit(message: str, author: str = "dev", parents: int = 1) -> MagicMock:
     commit = MagicMock()
     commit.message = message
     commit.hexsha = "abc1234567890"
     commit.author = author
     commit.authored_datetime = datetime(2026, 3, 1, tzinfo=timezone.utc)
     commit.stats.total = {"files": 3, "insertions": 50, "deletions": 10}
+    commit.stats.files = {"src/main.ts": {}, "src/utils.ts": {}, "package.json": {}}
+    # Mock parents list
+    commit.parents = [MagicMock()] * parents
     return commit
 
 
@@ -37,6 +40,7 @@ class TestDetectCommit:
         )
         result = detect_commit(commit)
         assert result.is_ai
+        assert result.is_confirmed
         assert result.confidence >= 0.9
         assert result.ai_model == "Claude Opus"
         assert "Claude Co-Author" in result.signals
@@ -52,12 +56,14 @@ class TestDetectCommit:
         result = detect_commit(commit)
         assert not result.is_ai
         assert result.confidence < 0.5
+        assert result.confidence_label in ("heuristic", "none")
 
     def test_conventional_commit_heuristic(self):
         commit = _make_commit("feat(auth): add OAuth2 provider")
         result = detect_commit(commit)
-        # Heuristic only → below threshold
         assert result.confidence < 0.5
+        assert result.confidence_label == "heuristic"
+        assert "heuristic-only" in result.signals
 
     def test_stats_extraction(self):
         commit = _make_commit("fix: bug\n\nCo-Authored-By: Claude")
@@ -65,3 +71,19 @@ class TestDetectCommit:
         assert result.files_changed == 3
         assert result.insertions == 50
         assert result.deletions == 10
+
+    def test_file_types_extracted(self):
+        commit = _make_commit("fix: bug\n\nCo-Authored-By: Claude")
+        result = detect_commit(commit)
+        assert ".ts" in result.file_types
+        assert ".json" in result.file_types
+
+    def test_initial_commit_detected(self):
+        commit = _make_commit("feat: initial commit\n\nCo-Authored-By: Claude", parents=0)
+        result = detect_commit(commit)
+        assert result.is_initial_commit
+
+    def test_non_initial_commit(self):
+        commit = _make_commit("feat: add feature\n\nCo-Authored-By: Claude", parents=1)
+        result = detect_commit(commit)
+        assert not result.is_initial_commit

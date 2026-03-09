@@ -328,7 +328,7 @@
     <div class="overline">AI Code Quality Audit Report</div>
     <h1>my-project</h1>
     <div class="subtitle">168 commits analyzed &middot; 12 AI-authored &middot; 2 model(s) detected</div>
-    <div class="grade-pill">Grade B &mdash; 78.5 / 100</div>
+    <div class="grade-pill">Grade B &mdash; 76.2 / 100</div>
   </header>
 
   <div class="kpi-strip">
@@ -353,7 +353,7 @@
       <div class="detail">by AI</div>
     </div>
     <div class="kpi">
-      <div class="num amber">78.5</div>
+      <div class="num amber">76.2</div>
       <div class="lbl">Quality</div>
       <div class="detail">Grade B</div>
     </div>
@@ -379,9 +379,9 @@
       <div class="q-item">
       <div class="q-header">
         <span class="q-name">Test Coverage<span class="q-weight"> (30%)</span></span>
-        <span class="q-score bad">45</span>
+        <span class="q-score bad">38</span>
       </div>
-      <div class="q-track"><div class="q-fill bad" style="width:45.0%"></div></div>
+      <div class="q-track"><div class="q-fill bad" style="width:37.5%"></div></div>
     </div>
       <div class="q-item">
       <div class="q-header">
@@ -419,9 +419,24 @@
 
       <div class="section-label" style="margin-top:28px">Confidence</div>
       <ul class="conf-list">
-        <li><div class="conf-dot" style="background:var(--green)"></div> Confirmed <strong style="margin-left:auto">12</strong></li>
-        <li><div class="conf-dot" style="background:var(--amber)"></div> High <strong style="margin-left:auto">0</strong></li>
-        <li><div class="conf-dot" style="background:var(--text-tertiary)"></div> Medium <strong style="margin-left:auto">0</strong></li>
+        <li><div class="conf-dot" style="background:var(--green)"></div> Confirmed (Co-Author tag) <strong style="margin-left:auto">12</strong></li>
+        
+        
+        
+      </ul>
+    </div>
+  </div>
+
+  <!-- Trend + File Types -->
+  <div class="two-col">
+    <div>
+      <div class="section-label">Quality Trend</div>
+      <div id="trend-chart" style="position:relative;height:180px;border:1px solid var(--border);padding:16px;overflow:hidden"></div>
+    </div>
+    <div>
+      <div class="section-label">File Types Modified by AI</div>
+      <ul class="model-list">
+        <li><span><code>.md</code></span><span class="model-count">8</span></li><li><span><code>.conf</code></span><span class="model-count">5</span></li><li><span><code>.tsx</code></span><span class="model-count">4</span></li><li><span><code>.yml</code></span><span class="model-count">2</span></li><li><span><code>(no ext)</code></span><span class="model-count">1</span></li>
       </ul>
     </div>
   </div>
@@ -453,11 +468,11 @@
 </div>
 
 <script>
-const commits = [{"date": "2026-03-06", "hash": "7d4f927", "model": "Claude Opus", "message": "docs: 개발 일지 업데이트 — 영상 인트로 로딩 최적화 기록", "grade": "A", "score": 86.5, "confidence": 95, "files": 1, "insertions": 250, "deletions": 0, "msg_score": 100, "size_score": 85.0, "test_score": 70.0, "doc_score": 100.0}, {"date": "2026-03-06", "hash": "cef0ebf", "model": "Claude Opus", "message": "fix: 영상 인트로 첫 방문 로딩 개선 — prefetch + readyState 체크", "grade": "B", "score": 74.5, "confidence": 95, "files": 2, "insertions": 23, "deletions": 0, "msg_score": 100, "size_score": 100.0, "test_score": 30.0, "doc_score": 70.0}, {"date": "2026-03-06", "hash": "05ff5b9", "model": "Claude Opus", "message": "fix: 영상 인트로 로딩 UX 개선 — 진행률 표시 + 15초 타임아웃", "grade": "B", "score": 74.5, "confidence": 95, "files": 1, "insertions": 43, "deletions": 11, "msg_score": 100, "size_score": 100.0, "test_score": 30.0, "doc_score": 70.0}, {"date": "2026-03-06", "hash": "24a3b12", "model": "Claude Opus", "message": "docs: groupware 502 인시던트 일지 + 배포 스펙 CRLF/.env 경고 추가", "grade": "A+", "score": 95.5, "confidence": 95, "files": 5, "insertions": 413, "deletions": 1, "msg_score": 100, "size_score": 85.0, "test_score": 100.0, "doc_score": 100.0}, {"date": "2026-03-06", "hash": "d477917", "model": "Claude Opus", "message": "fix(deploy): CRLF → LF 변환 + .gitattributes eol=lf 강제", "grade": "B", "score": 74.5, "confidence": 95, "files": 1, "insertions": 8, "deletions": 0, "msg_score": 100, "size_score": 100.0, "test_score": 30.0, "doc_score": 70.0}, {"date": "2026-03-06", "hash": "bdc7b08", "model": "Claude Opus", "message": "fix: 영상 인트로 모바일 데드엔드 해결 — 로딩 중 SKIP 버튼 표시 + error 안전망", "grade": "B", "score": 74.5, "confidence": 95, "files": 1, "insertions": 35, "deletions": 31, "msg_score": 100, "size_score": 100.0, "test_score": 30.0, "doc_score": 70.0}, {"date": "2026-03-05", "hash": "0a427e3", "model": "Claude Sonnet", "message": "fix(nginx): groupware try_files 원복, placeholder index.html로 403 해결", "grade": "B", "score": 74.5, "confidence": 95, "files": 1, "insertions": 2, "deletions": 8, "msg_score": 100, "size_score": 100.0, "test_score": 30.0, "doc_score": 70.0}, {"date": "2026-03-05", "hash": "101d97c", "model": "Claude Sonnet", "message": "fix(nginx): groupware try_files $uri/ 제거로 403 근본 해결", "grade": "B", "score": 74.5, "confidence": 95, "files": 1, "insertions": 8, "deletions": 2, "msg_score": 100, "size_score": 100.0, "test_score": 30.0, "doc_score": 70.0}, {"date": "2026-03-05", "hash": "febe534", "model": "Claude Sonnet", "message": "fix(nginx): groupware 빈 볼륨 접근 시 403 → 'Missing' 처리", "grade": "B", "score": 74.5, "confidence": 95, "files": 1, "insertions": 1, "deletions": 0, "msg_score": 100, "size_score": 100.0, "test_score": 30.0, "doc_score": 70.0}, {"date": "2026-03-05", "hash": "933c139", "model": "Claude Sonnet", "message": "docs: 서버 인프라 구성도 업데이트 + groupware 배포 스펙 추가", "grade": "A+", "score": 95.5, "confidence": 95, "files": 2, "insertions": 317, "deletions": 103, "msg_score": 100, "size_score": 85.0, "test_score": 100.0, "doc_score": 100.0}, {"date": "2026-03-05", "hash": "da34630", "model": "Claude Sonnet", "message": "feat(nginx): groupware reverse proxy 추가 (/groupware/ → p6ix_groupware:7211)", "grade": "C", "score": 68.2, "confidence": 95, "files": 2, "insertions": 53, "deletions": 5, "msg_score": 75.0, "size_score": 100.0, "test_score": 30.0, "doc_score": 70.0}, {"date": "2026-02-10", "hash": "75196af", "model": "Claude Opus", "message": "feat: enable HTTPS with SSL for www.p6ix.co.kr domain", "grade": "B", "score": 74.5, "confidence": 95, "files": 2, "insertions": 59, "deletions": 67, "msg_score": 100, "size_score": 100.0, "test_score": 30.0, "doc_score": 70.0}];
+const commits = [{"date": "2026-03-06", "hash": "7d4f927", "model": "Claude Opus", "message": "docs: 개발 일지 업데이트 — 영상 인트로 로딩 최적화 기록", "grade": "A", "score": 86.5, "confidence": 95, "conf_label": "confirmed", "files": 1, "insertions": 250, "deletions": 0, "msg_score": 100, "size_score": 85.0, "test_score": 70.0, "doc_score": 100.0}, {"date": "2026-03-06", "hash": "cef0ebf", "model": "Claude Opus", "message": "fix: 영상 인트로 첫 방문 로딩 개선 — prefetch + readyState 체크", "grade": "B", "score": 71.5, "confidence": 95, "conf_label": "confirmed", "files": 2, "insertions": 23, "deletions": 0, "msg_score": 100, "size_score": 100.0, "test_score": 20.0, "doc_score": 70.0}, {"date": "2026-03-06", "hash": "05ff5b9", "model": "Claude Opus", "message": "fix: 영상 인트로 로딩 UX 개선 — 진행률 표시 + 15초 타임아웃", "grade": "B", "score": 71.5, "confidence": 95, "conf_label": "confirmed", "files": 1, "insertions": 43, "deletions": 11, "msg_score": 100, "size_score": 100.0, "test_score": 20.0, "doc_score": 70.0}, {"date": "2026-03-06", "hash": "24a3b12", "model": "Claude Opus", "message": "docs: groupware 502 인시던트 일지 + 배포 스펙 CRLF/.env 경고 추가", "grade": "A+", "score": 95.5, "confidence": 95, "conf_label": "confirmed", "files": 5, "insertions": 413, "deletions": 1, "msg_score": 100, "size_score": 85.0, "test_score": 100.0, "doc_score": 100.0}, {"date": "2026-03-06", "hash": "d477917", "model": "Claude Opus", "message": "fix(deploy): CRLF → LF 변환 + .gitattributes eol=lf 강제", "grade": "B", "score": 71.5, "confidence": 95, "conf_label": "confirmed", "files": 1, "insertions": 8, "deletions": 0, "msg_score": 100, "size_score": 100.0, "test_score": 20.0, "doc_score": 70.0}, {"date": "2026-03-06", "hash": "bdc7b08", "model": "Claude Opus", "message": "fix: 영상 인트로 모바일 데드엔드 해결 — 로딩 중 SKIP 버튼 표시 + error 안전망", "grade": "B", "score": 71.5, "confidence": 95, "conf_label": "confirmed", "files": 1, "insertions": 35, "deletions": 31, "msg_score": 100, "size_score": 100.0, "test_score": 20.0, "doc_score": 70.0}, {"date": "2026-03-05", "hash": "0a427e3", "model": "Claude Sonnet", "message": "fix(nginx): groupware try_files 원복, placeholder index.html로 403 해결", "grade": "B", "score": 71.5, "confidence": 95, "conf_label": "confirmed", "files": 1, "insertions": 2, "deletions": 8, "msg_score": 100, "size_score": 100.0, "test_score": 20.0, "doc_score": 70.0}, {"date": "2026-03-05", "hash": "101d97c", "model": "Claude Sonnet", "message": "fix(nginx): groupware try_files $uri/ 제거로 403 근본 해결", "grade": "B", "score": 71.5, "confidence": 95, "conf_label": "confirmed", "files": 1, "insertions": 8, "deletions": 2, "msg_score": 100, "size_score": 100.0, "test_score": 20.0, "doc_score": 70.0}, {"date": "2026-03-05", "hash": "febe534", "model": "Claude Sonnet", "message": "fix(nginx): groupware 빈 볼륨 접근 시 403 → 'Missing' 처리", "grade": "B", "score": 71.5, "confidence": 95, "conf_label": "confirmed", "files": 1, "insertions": 1, "deletions": 0, "msg_score": 100, "size_score": 100.0, "test_score": 20.0, "doc_score": 70.0}, {"date": "2026-03-05", "hash": "933c139", "model": "Claude Sonnet", "message": "docs: 서버 인프라 구성도 업데이트 + groupware 배포 스펙 추가", "grade": "A+", "score": 95.5, "confidence": 95, "conf_label": "confirmed", "files": 2, "insertions": 317, "deletions": 103, "msg_score": 100, "size_score": 85.0, "test_score": 100.0, "doc_score": 100.0}, {"date": "2026-03-05", "hash": "da34630", "model": "Claude Sonnet", "message": "feat(nginx): groupware reverse proxy 추가 (/groupware/ → p6ix_groupware:7211)", "grade": "C", "score": 65.2, "confidence": 95, "conf_label": "confirmed", "files": 2, "insertions": 53, "deletions": 5, "msg_score": 75.0, "size_score": 100.0, "test_score": 20.0, "doc_score": 70.0}, {"date": "2026-02-10", "hash": "75196af", "model": "Claude Opus", "message": "feat: enable HTTPS with SSL for www.p6ix.co.kr domain", "grade": "B", "score": 71.5, "confidence": 95, "conf_label": "confirmed", "files": 2, "insertions": 59, "deletions": 67, "msg_score": 100, "size_score": 100.0, "test_score": 20.0, "doc_score": 70.0}];
 const tbody = document.getElementById('commits-body');
 commits.forEach(c => {
   const gc = c.score >= 80 ? 'g-high' : (c.score >= 60 ? 'g-mid' : 'g-low');
-  const confTxt = c.confidence >= 90 ? 'confirmed' : (c.confidence >= 70 ? 'high' : 'medium');
+  const confTxt = c.conf_label;
   tbody.innerHTML += `<tr>
     <td>${c.date}</td>
     <td><span class="hash-link">${c.hash}</span></td>
@@ -477,6 +492,29 @@ commits.forEach(c => {
     <td><span class="conf-badge">${confTxt}</span></td>
   </tr>`;
 });
+
+// Trend chart — pure CSS/JS bar chart
+const trendDates = ["2026-02-10", "2026-03-05", "2026-03-06"];
+const trendAvgs = [71.5, 75.0, 78.0];
+const chart = document.getElementById('trend-chart');
+if (trendDates.length > 0) {
+  const maxScore = 100;
+  const barWidth = Math.max(20, Math.min(60, (chart.clientWidth - 40) / trendDates.length - 4));
+  let html = '<div style="display:flex;align-items:flex-end;gap:4px;height:140px;padding-top:8px">';
+  trendAvgs.forEach((score, i) => {
+    const h = Math.max(4, (score / maxScore) * 130);
+    const color = score >= 80 ? '#15803d' : (score >= 60 ? '#b45309' : '#dc2626');
+    html += `<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:${barWidth}px">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#78716c;margin-bottom:2px">${score}</span>
+      <div style="width:100%;max-width:${barWidth}px;height:${h}px;background:${color}"></div>
+      <span style="font-size:10px;color:#a8a29e;margin-top:4px;white-space:nowrap">${trendDates[i].slice(5)}</span>
+    </div>`;
+  });
+  html += '</div>';
+  chart.innerHTML = html;
+} else {
+  chart.innerHTML = '<p style="color:#a8a29e;text-align:center;padding-top:60px">Not enough data for trend</p>';
+}
 </script>
 </body>
 </html>

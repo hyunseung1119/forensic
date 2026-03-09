@@ -69,12 +69,19 @@ def score_commit_message(message: str) -> tuple[float, str]:
     return min(100, max(0, score)), ", ".join(reasons)
 
 
-def score_change_size(files_changed: int, insertions: int, deletions: int) -> tuple[float, str]:
+def score_change_size(
+    files_changed: int, insertions: int, deletions: int,
+    is_initial_commit: bool = False,
+) -> tuple[float, str]:
     """Score based on change granularity (smaller = better)."""
     total_lines = insertions + deletions
 
     if total_lines == 0:
         return 50.0, "no-changes"
+
+    # Initial commits are inherently large — don't penalize
+    if is_initial_commit:
+        return 70.0, f"initial-commit({total_lines}L, {files_changed}f, exempt)"
 
     # Ideal: focused changes (< 200 lines, < 10 files)
     score = 100.0
@@ -101,24 +108,49 @@ def score_change_size(files_changed: int, insertions: int, deletions: int) -> tu
     return max(0, score), ", ".join(reasons)
 
 
+def _is_test_file(path: str) -> bool:
+    """Strictly check if a file path is a test file."""
+    p = path.lower()
+    # Must match test file naming conventions, not just contain "test" anywhere
+    parts = p.replace("\\", "/").split("/")
+    filename = parts[-1] if parts else ""
+
+    # Directory-level: __tests__/, tests/, test/
+    if any(d in ("__tests__", "tests", "test", "spec", "specs") for d in parts[:-1]):
+        return True
+    # File-level: test_*.py, *.test.ts, *.spec.js, *_test.go
+    if filename.startswith("test_") or filename.startswith("test."):
+        return True
+    for ext in (".test.", ".spec.", "_test.", "_spec."):
+        if ext in filename:
+            return True
+    return False
+
+
 def score_test_accompany(message: str, files_changed_names: list[str] | None = None) -> tuple[float, str]:
-    """Score whether the commit includes test changes."""
+    """Score whether the commit includes test changes (strict file check)."""
     msg_lower = message.lower()
-    has_test_mention = any(kw in msg_lower for kw in ["test", "spec", "테스트", "검증"])
 
     if files_changed_names:
-        has_test_files = any(
-            "test" in f.lower() or "spec" in f.lower() or "__tests__" in f
-            for f in files_changed_names
-        )
-    else:
-        has_test_files = has_test_mention
+        test_files = [f for f in files_changed_names if _is_test_file(f)]
+        src_files = [f for f in files_changed_names if not _is_test_file(f)]
 
-    if has_test_files:
-        return 100.0, "tests-included"
-    if msg_lower.startswith("docs:") or msg_lower.startswith("ci:") or msg_lower.startswith("chore:"):
-        return 70.0, "docs/ci(tests-optional)"
-    return 30.0, "no-tests"
+        if test_files and src_files:
+            return 100.0, f"tests-included({len(test_files)} test files)"
+        if test_files and not src_files:
+            return 90.0, "test-only-commit"
+        # No test files found — check if test is optional for this commit type
+        if msg_lower.startswith("docs:") or msg_lower.startswith("ci:") or msg_lower.startswith("chore:"):
+            return 70.0, "docs/ci(tests-optional)"
+        return 20.0, f"no-tests({len(src_files)} src files)"
+    else:
+        # No file list available — fallback to message heuristic (penalized)
+        has_test_mention = any(kw in msg_lower for kw in ["test", "spec", "테스트", "검증"])
+        if has_test_mention:
+            return 60.0, "test-mentioned-in-msg(unverified)"
+        if msg_lower.startswith("docs:") or msg_lower.startswith("ci:") or msg_lower.startswith("chore:"):
+            return 70.0, "docs/ci(tests-optional)"
+        return 20.0, "no-tests(no-file-info)"
 
 
 def score_doc_coverage(message: str) -> tuple[float, str]:
@@ -132,11 +164,16 @@ def score_doc_coverage(message: str) -> tuple[float, str]:
     return 40.0, "minimal-docs"
 
 
-def score_detection(detection: AIDetection, file_names: list[str] | None = None) -> QualityScore:
+def score_detection(
+    detection: AIDetection,
+    file_names: list[str] | None = None,
+    is_initial_commit: bool = False,
+) -> QualityScore:
     """Calculate comprehensive quality score for an AI detection."""
     msg_score, msg_reason = score_commit_message(detection.message)
     size_score, size_reason = score_change_size(
-        detection.files_changed, detection.insertions, detection.deletions
+        detection.files_changed, detection.insertions, detection.deletions,
+        is_initial_commit=is_initial_commit,
     )
     test_score, test_reason = score_test_accompany(detection.message, file_names)
     doc_score, doc_reason = score_doc_coverage(detection.message)

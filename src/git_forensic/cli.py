@@ -98,7 +98,10 @@ def main(
             file_names = list(commit.stats.files.keys())
         except Exception:
             file_names = None
-        scores.append(score_detection(detection, file_names))
+        scores.append(score_detection(
+            detection, file_names,
+            is_initial_commit=detection.is_initial_commit,
+        ))
 
     # Render reports
     render_summary(detections, scores, total_commits, console)
