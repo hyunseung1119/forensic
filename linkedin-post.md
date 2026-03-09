@@ -53,7 +53,11 @@ AI 도구를 잘 쓰는 것도 중요하지만,
 측정할 수 없으면, 개선할 수도 없으니까요.
 
 GitHub: https://github.com/hyunseung1119/forensic
-설치 & 실행: `uvx git-forensic /path/to/repo`
+
+설치 없이 바로 실행:
+uvx git-forensic .                    # 현재 폴더의 Git 레포 스캔
+uvx git-forensic ./my-project         # 특정 프로젝트 스캔
+uvx git-forensic . --html report.html # HTML 대시보드 생성
 
 피드백 환영합니다.
 
