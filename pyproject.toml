@@ -1,0 +1,29 @@
+[project]
+name = "git-forensic"
+version = "0.1.0"
+description = "Audit AI-authored code quality in git repositories"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "click>=8.1",
+    "gitpython>=3.1",
+    "rich>=13.0",
+]
+
+[project.scripts]
+git-forensic = "git_forensic.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/git_forensic"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]

@@ -1,0 +1,298 @@
+{
+  "summary": {
+    "total_commits": 168,
+    "ai_commits": 12,
+    "ai_ratio": 7.1,
+    "avg_score": 78.5
+  },
+  "commits": [
+    {
+      "hash": "7d4f9272e42f716b5cdfa0b2edea1bf82c4303b4",
+      "date": "2026-03-06",
+      "author": "joohyeona",
+      "message": "docs: 개발 일지 업데이트 — 영상 인트로 로딩 최적화 기록",
+      "ai_model": "Claude Opus",
+      "confidence": 0.95,
+      "signals": [
+        "Claude Co-Author"
+      ],
+      "score": {
+        "overall": 86.5,
+        "grade": "A",
+        "commit_message": 100,
+        "change_size": 85.0,
+        "test_coverage": 70.0,
+        "doc_coverage": 100.0
+      },
+      "stats": {
+        "files_changed": 1,
+        "insertions": 250,
+        "deletions": 0
+      }
+    },
+    {
+      "hash": "cef0ebf8bcb8859e9a1219df0743f79db1067994",
+      "date": "2026-03-06",
+      "author": "joohyeona",
+      "message": "fix: 영상 인트로 첫 방문 로딩 개선 — prefetch + readyState 체크",
+      "ai_model": "Claude Opus",
+      "confidence": 0.95,
+      "signals": [
+        "Claude Co-Author"
+      ],
+      "score": {
+        "overall": 74.5,
+        "grade": "B",
+        "commit_message": 100,
+        "change_size": 100.0,
+        "test_coverage": 30.0,
+        "doc_coverage": 70.0
+      },
+      "stats": {
+        "files_changed": 2,
+        "insertions": 23,
+        "deletions": 0
+      }
+    },
+    {
+      "hash": "05ff5b9d1949994eb98e6fc4ba37565df3bba6f9",
+      "date": "2026-03-06",
+      "author": "joohyeona",
+      "message": "fix: 영상 인트로 로딩 UX 개선 — 진행률 표시 + 15초 타임아웃",
+      "ai_model": "Claude Opus",
+      "confidence": 0.95,
+      "signals": [
+        "Claude Co-Author"
+      ],
+      "score": {
+        "overall": 74.5,
+        "grade": "B",
+        "commit_message": 100,
+        "change_size": 100.0,
+        "test_coverage": 30.0,
+        "doc_coverage": 70.0
+      },
+      "stats": {
+        "files_changed": 1,
+        "insertions": 43,
+        "deletions": 11
+      }
+    },
+    {
+      "hash": "24a3b12aff3ac4c3b0510715a62a323f0c56d9ed",
+      "date": "2026-03-06",
+      "author": "joohyeona",
+      "message": "docs: groupware 502 인시던트 일지 + 배포 스펙 CRLF/.env 경고 추가",
+      "ai_model": "Claude Opus",
+      "confidence": 0.95,
+      "signals": [
+        "Claude Co-Author"
+      ],
+      "score": {
+        "overall": 95.5,
+        "grade": "A+",
+        "commit_message": 100,
+        "change_size": 85.0,
+        "test_coverage": 100.0,
+        "doc_coverage": 100.0
+      },
+      "stats": {
+        "files_changed": 5,
+        "insertions": 413,
+        "deletions": 1
+      }
+    },
+    {
+      "hash": "d477917e287fc7f07f9b59e5c02972d204e56742",
+      "date": "2026-03-06",
+      "author": "joohyeona",
+      "message": "fix(deploy): CRLF → LF 변환 + .gitattributes eol=lf 강제",
+      "ai_model": "Claude Opus",
+      "confidence": 0.95,
+      "signals": [
+        "Claude Co-Author"
+      ],
+      "score": {
+        "overall": 74.5,
+        "grade": "B",
+        "commit_message": 100,
+        "change_size": 100.0,
+        "test_coverage": 30.0,
+        "doc_coverage": 70.0
+      },
+      "stats": {
+        "files_changed": 1,
+        "insertions": 8,
+        "deletions": 0
+      }
+    },
+    {
+      "hash": "bdc7b085d71faa28cd02ca621855c2fb666542d0",
+      "date": "2026-03-06",
+      "author": "joohyeona",
+      "message": "fix: 영상 인트로 모바일 데드엔드 해결 — 로딩 중 SKIP 버튼 표시 + error 안전망",
+      "ai_model": "Claude Opus",
+      "confidence": 0.95,
+      "signals": [
+        "Claude Co-Author"
+      ],
+      "score": {
+        "overall": 74.5,
+        "grade": "B",
+        "commit_message": 100,
+        "change_size": 100.0,
+        "test_coverage": 30.0,
+        "doc_coverage": 70.0
+      },
+      "stats": {
+        "files_changed": 1,
+        "insertions": 35,
+        "deletions": 31
+      }
+    },
+    {
+      "hash": "0a427e394478fe79619fc9be2a1b0ad75bb953a9",
+      "date": "2026-03-05",
+      "author": "joohyeona",
+      "message": "fix(nginx): groupware try_files 원복, placeholder index.html로 403 해결",
+      "ai_model": "Claude Sonnet",
+      "confidence": 0.95,
+      "signals": [
+        "Claude Co-Author"
+      ],
+      "score": {
+        "overall": 74.5,
+        "grade": "B",
+        "commit_message": 100,
+        "change_size": 100.0,
+        "test_coverage": 30.0,
+        "doc_coverage": 70.0
+      },
+      "stats": {
+        "files_changed": 1,
+        "insertions": 2,
+        "deletions": 8
+      }
+    },
+    {
+      "hash": "101d97c646331ebe24ccaee8da3f6d579944852a",
+      "date": "2026-03-05",
+      "author": "joohyeona",
+      "message": "fix(nginx): groupware try_files $uri/ 제거로 403 근본 해결",
+      "ai_model": "Claude Sonnet",
+      "confidence": 0.95,
+      "signals": [
+        "Claude Co-Author"
+      ],
+      "score": {
+        "overall": 74.5,
+        "grade": "B",
+        "commit_message": 100,
+        "change_size": 100.0,
+        "test_coverage": 30.0,
+        "doc_coverage": 70.0
+      },
+      "stats": {
+        "files_changed": 1,
+        "insertions": 8,
+        "deletions": 2
+      }
+    },
+    {
+      "hash": "febe534a3f71ab66d34c66cba5be427a1cc1b3aa",
+      "date": "2026-03-05",
+      "author": "joohyeona",
+      "message": "fix(nginx): groupware 빈 볼륨 접근 시 403 → 'Missing' 처리",
+      "ai_model": "Claude Sonnet",
+      "confidence": 0.95,
+      "signals": [
+        "Claude Co-Author"
+      ],
+      "score": {
+        "overall": 74.5,
+        "grade": "B",
+        "commit_message": 100,
+        "change_size": 100.0,
+        "test_coverage": 30.0,
+        "doc_coverage": 70.0
+      },
+      "stats": {
+        "files_changed": 1,
+        "insertions": 1,
+        "deletions": 0
+      }
+    },
+    {
+      "hash": "933c139b89dd3a77d076e5cb011c08c0a78213ca",
+      "date": "2026-03-05",
+      "author": "joohyeona",
+      "message": "docs: 서버 인프라 구성도 업데이트 + groupware 배포 스펙 추가",
+      "ai_model": "Claude Sonnet",
+      "confidence": 0.95,
+      "signals": [
+        "Claude Co-Author"
+      ],
+      "score": {
+        "overall": 95.5,
+        "grade": "A+",
+        "commit_message": 100,
+        "change_size": 85.0,
+        "test_coverage": 100.0,
+        "doc_coverage": 100.0
+      },
+      "stats": {
+        "files_changed": 2,
+        "insertions": 317,
+        "deletions": 103
+      }
+    },
+    {
+      "hash": "da34630041a42d95d1ea0a008a4bf0992762fcf6",
+      "date": "2026-03-05",
+      "author": "joohyeona",
+      "message": "feat(nginx): groupware reverse proxy 추가 (/groupware/ → p6ix_groupware:7211)",
+      "ai_model": "Claude Sonnet",
+      "confidence": 0.95,
+      "signals": [
+        "Claude Co-Author"
+      ],
+      "score": {
+        "overall": 68.2,
+        "grade": "C",
+        "commit_message": 75.0,
+        "change_size": 100.0,
+        "test_coverage": 30.0,
+        "doc_coverage": 70.0
+      },
+      "stats": {
+        "files_changed": 2,
+        "insertions": 53,
+        "deletions": 5
+      }
+    },
+    {
+      "hash": "75196af19fb2a4da1b0c18f76b7bd3ba8eec5ff1",
+      "date": "2026-02-10",
+      "author": "홍길동",
+      "message": "feat: enable HTTPS with SSL for www.p6ix.co.kr domain",
+      "ai_model": "Claude Opus",
+      "confidence": 0.95,
+      "signals": [
+        "Claude Co-Author"
+      ],
+      "score": {
+        "overall": 74.5,
+        "grade": "B",
+        "commit_message": 100,
+        "change_size": 100.0,
+        "test_coverage": 30.0,
+        "doc_coverage": 70.0
+      },
+      "stats": {
+        "files_changed": 2,
+        "insertions": 59,
+        "deletions": 67
+      }
+    }
+  ]
+}
