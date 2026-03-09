@@ -53,8 +53,7 @@ AI 도구를 잘 쓰는 것도 중요하지만,
 측정할 수 없으면, 개선할 수도 없으니까요.
 
 GitHub: https://github.com/hyunseung1119/forensic
-설치: `pip install git+https://github.com/hyunseung1119/forensic.git`
-실행: `git-forensic /path/to/repo`
+설치 & 실행: `uvx git-forensic /path/to/repo`
 
 피드백 환영합니다.
 
