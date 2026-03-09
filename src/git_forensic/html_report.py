@@ -1,4 +1,4 @@
-"""HTML report generator — single-file dashboard with embedded CSS/JS."""
+"""HTML report generator — editorial-style single-file dashboard."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ def generate_html(
     total_commits: int,
     repo_name: str = "Repository",
 ) -> str:
-    """Generate a complete HTML dashboard as a string."""
+    """Generate editorial-style HTML dashboard."""
     ai_count = len(detections)
     ai_ratio = round(ai_count / total_commits * 100, 1) if total_commits else 0
     avg_score = round(sum(s.overall for s in scores) / len(scores), 1) if scores else 0
@@ -39,7 +39,6 @@ def generate_html(
     grade = _grade(avg_score)
     grade_color = _grade_css_color(grade)
 
-    # Build commits JSON for the table
     commits_data = json.dumps([
         {
             "date": d.date,
@@ -60,271 +59,413 @@ def generate_html(
         for d, s in zip(detections, scores)
     ], ensure_ascii=False)
 
-    # Model chart data
-    model_labels = json.dumps([m for m, _ in model_counts.most_common()])
-    model_values = json.dumps([c for _, c in model_counts.most_common()])
-
-    # Timeline data (commits by date)
-    date_counts: dict[str, int] = {}
-    for d in detections:
-        date_counts[d.date] = date_counts.get(d.date, 0) + 1
-    timeline_labels = json.dumps(sorted(date_counts.keys()))
-    timeline_values = json.dumps([date_counts[k] for k in sorted(date_counts.keys())])
-
     return f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>git-forensic | {repo_name}</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {{
-    --bg: #0d1117; --card: #161b22; --border: #30363d;
-    --text: #e6edf3; --dim: #8b949e; --accent: #58a6ff;
-    --green: #3fb950; --red: #f85149; --yellow: #d29922; --purple: #bc8cff;
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --border: #e7e5e4;
+    --border-strong: #d6d3d1;
+    --text: #1c1917;
+    --text-secondary: #78716c;
+    --text-tertiary: #a8a29e;
+    --accent: #dc2626;
+    --accent-light: #fef2f2;
+    --ink: #0c0a09;
+    --green: #15803d;
+    --green-bg: #f0fdf4;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --amber: #b45309;
+    --amber-bg: #fffbeb;
   }}
+
   * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+
   body {{
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-    background: var(--bg); color: var(--text); line-height: 1.6;
-    min-height: 100vh;
-  }}
-  .container {{ max-width: 1200px; margin: 0 auto; padding: 24px; }}
-
-  /* Header */
-  .header {{
-    display: flex; align-items: center; gap: 16px;
-    padding: 32px 0 24px; border-bottom: 1px solid var(--border);
-    margin-bottom: 32px;
-  }}
-  .header h1 {{ font-size: 28px; font-weight: 700; }}
-  .header h1 span {{ color: var(--accent); }}
-  .header .repo {{ color: var(--dim); font-size: 16px; }}
-  .header .badge {{
-    background: {grade_color}22; color: {grade_color};
-    padding: 6px 16px; border-radius: 20px; font-weight: 700;
-    font-size: 18px; border: 1px solid {grade_color}44;
-    margin-left: auto;
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
   }}
 
-  /* KPI Cards */
-  .kpi-grid {{
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 16px; margin-bottom: 32px;
+  .container {{ max-width: 960px; margin: 0 auto; padding: 48px 24px; }}
+
+  /* ── Header: editorial masthead ── */
+  .masthead {{
+    text-align: center;
+    padding-bottom: 40px;
+    border-bottom: 3px double var(--border-strong);
+    margin-bottom: 48px;
+  }}
+  .masthead .overline {{
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+  }}
+  .masthead h1 {{
+    font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+    font-size: 48px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }}
+  .masthead .subtitle {{
+    font-size: 15px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+  }}
+  .masthead .grade-pill {{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 24px;
+    border: 2px solid {grade_color};
+    color: {grade_color};
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+  }}
+
+  /* ── KPI Strip ── */
+  .kpi-strip {{
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border: 1px solid var(--border);
+    margin-bottom: 48px;
+  }}
+  @media (max-width: 640px) {{
+    .kpi-strip {{ grid-template-columns: repeat(2, 1fr); }}
   }}
   .kpi {{
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 20px; text-align: center;
+    padding: 24px 16px;
+    text-align: center;
+    border-right: 1px solid var(--border);
   }}
-  .kpi .value {{ font-size: 32px; font-weight: 700; }}
-  .kpi .label {{ font-size: 13px; color: var(--dim); margin-top: 4px; }}
-  .kpi .sub {{ font-size: 12px; color: var(--dim); margin-top: 2px; }}
-  .kpi.green .value {{ color: var(--green); }}
-  .kpi.red .value {{ color: var(--red); }}
-  .kpi.accent .value {{ color: var(--accent); }}
-  .kpi.yellow .value {{ color: var(--yellow); }}
-  .kpi.purple .value {{ color: var(--purple); }}
-
-  /* Charts Row */
-  .charts-row {{
-    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px;
+  .kpi:last-child {{ border-right: none; }}
+  .kpi .num {{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1;
   }}
-  @media (max-width: 768px) {{ .charts-row {{ grid-template-columns: 1fr; }} }}
-
-  .chart-card {{
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 24px;
+  .kpi .num.green {{ color: var(--green); }}
+  .kpi .num.red {{ color: var(--red); }}
+  .kpi .num.amber {{ color: var(--amber); }}
+  .kpi .lbl {{
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-top: 8px;
   }}
-  .chart-card h3 {{ font-size: 14px; color: var(--dim); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }}
+  .kpi .detail {{
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }}
 
-  /* Quality Bars */
-  .quality-bars {{ display: flex; flex-direction: column; gap: 16px; }}
-  .q-row {{ display: flex; align-items: center; gap: 12px; }}
-  .q-row .q-label {{ width: 120px; font-size: 14px; color: var(--dim); }}
-  .q-row .q-track {{
-    flex: 1; height: 28px; background: #21262d; border-radius: 6px;
+  /* ── Two-column layout ── */
+  .two-col {{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 48px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid var(--border);
+  }}
+  @media (max-width: 768px) {{
+    .two-col {{ grid-template-columns: 1fr; gap: 32px; }}
+  }}
+
+  .section-label {{
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }}
+
+  /* ── Quality Bars ── */
+  .q-item {{ margin-bottom: 20px; }}
+  .q-header {{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }}
+  .q-name {{ font-size: 14px; font-weight: 500; }}
+  .q-score {{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+  }}
+  .q-score.good {{ color: var(--green); }}
+  .q-score.warn {{ color: var(--amber); }}
+  .q-score.bad {{ color: var(--red); }}
+  .q-weight {{
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-left: 4px;
+  }}
+  .q-track {{
+    height: 6px;
+    background: var(--border);
+    overflow: hidden;
+  }}
+  .q-fill {{
+    height: 100%;
+    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  }}
+  .q-fill.good {{ background: var(--green); }}
+  .q-fill.warn {{ background: var(--amber); }}
+  .q-fill.bad {{ background: var(--red); }}
+
+  /* ── Composition ── */
+  .comp-row {{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  }}
+  .comp-bar-wrap {{
+    flex: 1; height: 32px; background: var(--border);
     overflow: hidden; position: relative;
   }}
-  .q-row .q-fill {{
-    height: 100%; border-radius: 6px; transition: width 1s ease;
-    display: flex; align-items: center; justify-content: flex-end;
-    padding-right: 8px; font-size: 12px; font-weight: 700;
-    min-width: 40px;
+  .comp-fill {{
+    height: 100%;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
   }}
-  .q-row .q-weight {{ width: 40px; text-align: right; font-size: 12px; color: var(--dim); }}
+  .comp-label {{ font-size: 13px; color: var(--text-secondary); min-width: 80px; }}
 
-  /* Donut Chart */
-  .donut-container {{ display: flex; align-items: center; justify-content: center; gap: 32px; }}
-  .donut {{ position: relative; width: 160px; height: 160px; }}
-  .donut svg {{ transform: rotate(-90deg); }}
-  .donut .center-text {{
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    text-align: center;
+  .model-list {{ list-style: none; }}
+  .model-list li {{
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
   }}
-  .donut .center-text .pct {{ font-size: 28px; font-weight: 700; color: var(--accent); }}
-  .donut .center-text .lbl {{ font-size: 11px; color: var(--dim); }}
-  .legend {{ display: flex; flex-direction: column; gap: 8px; }}
-  .legend-item {{ display: flex; align-items: center; gap: 8px; font-size: 14px; }}
-  .legend-dot {{ width: 10px; height: 10px; border-radius: 50%; }}
+  .model-list li:last-child {{ border-bottom: none; }}
+  .model-count {{
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: var(--ink);
+  }}
 
-  /* Model Pills */
-  .model-pills {{ display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }}
-  .pill {{
-    background: var(--bg); border: 1px solid var(--border); border-radius: 20px;
-    padding: 8px 16px; font-size: 14px; display: flex; align-items: center; gap: 8px;
+  .conf-list {{ list-style: none; margin-top: 16px; }}
+  .conf-list li {{
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; padding: 4px 0;
   }}
-  .pill .count {{ color: var(--accent); font-weight: 700; }}
+  .conf-dot {{
+    width: 8px; height: 8px; border-radius: 50%;
+  }}
 
-  /* Confidence */
-  .conf-row {{ display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }}
-  .conf-item {{ display: flex; align-items: center; gap: 6px; font-size: 14px; }}
+  /* ── Table ── */
+  .table-section {{ margin-bottom: 48px; }}
+  .table-wrap {{ overflow-x: auto; }}
+  table {{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }}
+  thead {{ border-bottom: 2px solid var(--ink); }}
+  th {{
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }}
+  td {{
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }}
+  tr:hover {{ background: var(--accent-light); }}
 
-  /* Table */
-  .table-card {{
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; overflow: hidden; margin-bottom: 32px;
+  .hash-link {{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-secondary);
   }}
-  .table-card h3 {{
-    font-size: 14px; color: var(--dim); padding: 20px 24px 12px;
-    text-transform: uppercase; letter-spacing: 1px;
+  .model-tag {{
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--bg);
+    padding: 2px 8px;
+    border: 1px solid var(--border);
   }}
-  table {{ width: 100%; border-collapse: collapse; }}
-  thead {{ background: #21262d; }}
-  th {{ padding: 10px 16px; text-align: left; font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }}
-  td {{ padding: 12px 16px; border-top: 1px solid var(--border); font-size: 14px; }}
-  tr:hover {{ background: #1c2128; }}
-  .grade-badge {{
-    display: inline-block; padding: 2px 10px; border-radius: 12px;
-    font-weight: 700; font-size: 13px;
+  .grade-tag {{
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border: 1.5px solid;
   }}
-  .grade-A\\+, .grade-A {{ background: var(--green)22; color: var(--green); border: 1px solid var(--green)44; }}
-  .grade-B {{ background: var(--yellow)22; color: var(--yellow); border: 1px solid var(--yellow)44; }}
-  .grade-C {{ background: var(--yellow)22; color: var(--yellow); border: 1px solid var(--yellow)44; }}
-  .grade-D, .grade-F {{ background: var(--red)22; color: var(--red); border: 1px solid var(--red)44; }}
-  .hash {{ font-family: monospace; color: var(--accent); }}
-  .model {{ color: var(--purple); }}
-  .conf {{ font-size: 12px; }}
-  .diff-plus {{ color: var(--green); font-size: 12px; }}
-  .diff-minus {{ color: var(--red); font-size: 12px; }}
+  .grade-tag.g-high {{ color: var(--green); border-color: var(--green); background: var(--green-bg); }}
+  .grade-tag.g-mid {{ color: var(--amber); border-color: var(--amber); background: var(--amber-bg); }}
+  .grade-tag.g-low {{ color: var(--red); border-color: var(--red); background: var(--red-bg); }}
 
-  /* Footer */
+  .diff {{ font-family: 'JetBrains Mono', monospace; font-size: 12px; white-space: nowrap; }}
+  .diff .plus {{ color: var(--green); }}
+  .diff .minus {{ color: var(--red); }}
+
+  .conf-badge {{ font-size: 12px; color: var(--text-tertiary); }}
+
+  /* ── Score breakdown on hover ── */
+  .score-cell {{ position: relative; cursor: default; }}
+  .score-tip {{
+    display: none;
+    position: absolute;
+    right: 0; top: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    padding: 12px 16px;
+    z-index: 20;
+    min-width: 220px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    font-size: 12px;
+  }}
+  .score-cell:hover .score-tip {{ display: block; }}
+  .score-tip .tip-row {{
+    display: flex; justify-content: space-between;
+    padding: 3px 0;
+    border-bottom: 1px solid var(--border);
+  }}
+  .score-tip .tip-row:last-child {{ border-bottom: none; }}
+
+  /* ── Footer ── */
   .footer {{
-    text-align: center; padding: 24px; color: var(--dim); font-size: 13px;
-    border-top: 1px solid var(--border);
+    text-align: center;
+    padding: 32px 0;
+    border-top: 3px double var(--border-strong);
+    margin-top: 16px;
   }}
-  .footer a {{ color: var(--accent); text-decoration: none; }}
-
-  /* Score tooltip */
-  .score-detail {{
-    display: none; position: absolute; background: var(--card);
-    border: 1px solid var(--border); border-radius: 8px; padding: 12px;
-    z-index: 10; min-width: 200px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  .footer p {{
+    font-size: 12px;
+    color: var(--text-tertiary);
+    letter-spacing: 0.5px;
   }}
-  td:hover .score-detail {{ display: block; }}
+  .footer a {{
+    color: var(--text-secondary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }}
 </style>
 </head>
 <body>
 <div class="container">
 
-  <!-- Header -->
-  <div class="header">
+  <header class="masthead">
+    <div class="overline">AI Code Quality Audit Report</div>
+    <h1>{repo_name}</h1>
+    <div class="subtitle">168 commits analyzed &middot; {ai_count} AI-authored &middot; {len(set(d.ai_model for d in detections))} model(s) detected</div>
+    <div class="grade-pill">Grade {grade} &mdash; {avg_score} / 100</div>
+  </header>
+
+  <div class="kpi-strip">
+    <div class="kpi">
+      <div class="num">{total_commits}</div>
+      <div class="lbl">Commits</div>
+      <div class="detail">total</div>
+    </div>
+    <div class="kpi">
+      <div class="num">{ai_count}</div>
+      <div class="lbl">AI Commits</div>
+      <div class="detail">{ai_ratio}% of total</div>
+    </div>
+    <div class="kpi">
+      <div class="num green">+{total_ins:,}</div>
+      <div class="lbl">Lines Added</div>
+      <div class="detail">by AI</div>
+    </div>
+    <div class="kpi">
+      <div class="num red">-{total_del:,}</div>
+      <div class="lbl">Lines Removed</div>
+      <div class="detail">by AI</div>
+    </div>
+    <div class="kpi">
+      <div class="num amber">{avg_score}</div>
+      <div class="lbl">Quality</div>
+      <div class="detail">Grade {grade}</div>
+    </div>
+  </div>
+
+  <div class="two-col">
     <div>
-      <h1><span>git-forensic</span></h1>
-      <div class="repo">{repo_name}</div>
+      <div class="section-label">Quality Breakdown</div>
+      {_q_item("Commit Message", avg_msg, "25%")}
+      {_q_item("Change Size", avg_size, "30%")}
+      {_q_item("Test Coverage", avg_test, "30%")}
+      {_q_item("Documentation", avg_doc, "15%")}
     </div>
-    <div class="badge">{grade} — {avg_score}/100</div>
-  </div>
-
-  <!-- KPI Cards -->
-  <div class="kpi-grid">
-    <div class="kpi accent">
-      <div class="value">{total_commits}</div>
-      <div class="label">Total Commits</div>
-    </div>
-    <div class="kpi purple">
-      <div class="value">{ai_count}</div>
-      <div class="label">AI Commits</div>
-      <div class="sub">{ai_ratio}% of total</div>
-    </div>
-    <div class="kpi green">
-      <div class="value">+{total_ins:,}</div>
-      <div class="label">AI Lines Added</div>
-    </div>
-    <div class="kpi red">
-      <div class="value">-{total_del:,}</div>
-      <div class="label">AI Lines Removed</div>
-    </div>
-    <div class="kpi yellow">
-      <div class="value">{avg_score}</div>
-      <div class="label">Quality Score</div>
-      <div class="sub">Grade {grade}</div>
-    </div>
-  </div>
-
-  <!-- Charts Row -->
-  <div class="charts-row">
-
-    <!-- Donut: AI vs Human -->
-    <div class="chart-card">
-      <h3>AI vs Human Commits</h3>
-      <div class="donut-container">
-        <div class="donut">
-          <svg width="160" height="160" viewBox="0 0 160 160">
-            <circle cx="80" cy="80" r="60" fill="none" stroke="#21262d" stroke-width="20"/>
-            <circle cx="80" cy="80" r="60" fill="none" stroke="#58a6ff" stroke-width="20"
-              stroke-dasharray="{ai_ratio * 3.77:.1f} {(100 - ai_ratio) * 3.77:.1f}"
-              stroke-linecap="round"/>
-          </svg>
-          <div class="center-text">
-            <div class="pct">{ai_ratio}%</div>
-            <div class="lbl">AI-authored</div>
-          </div>
+    <div>
+      <div class="section-label">Composition</div>
+      <div class="comp-row">
+        <span class="comp-label">AI vs Human</span>
+        <div class="comp-bar-wrap">
+          <div class="comp-fill" style="width:{max(ai_ratio, 8)}%">{ai_ratio}%</div>
         </div>
-        <div class="legend">
-          <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> AI — {ai_count} commits</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#21262d"></div> Human — {human_count} commits</div>
-        </div>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary);min-width:48px;text-align:right">{ai_ratio}%</span>
       </div>
 
-      <h3 style="margin-top:24px">Models Used</h3>
-      <div class="model-pills">
-        {"".join(f'<div class="pill"><span>{m}</span><span class="count">{c}</span></div>' for m, c in model_counts.most_common())}
-      </div>
+      <div class="section-label" style="margin-top:28px">Models</div>
+      <ul class="model-list">
+        {"".join(f'<li><span>{m}</span><span class="model-count">{c}</span></li>' for m, c in model_counts.most_common())}
+      </ul>
 
-      <h3 style="margin-top:24px">Detection Confidence</h3>
-      <div class="conf-row">
-        <div class="conf-item">✅ <strong>{confirmed}</strong> confirmed</div>
-        <div class="conf-item">🔶 <strong>{high}</strong> high</div>
-        <div class="conf-item">🔸 <strong>{medium}</strong> medium</div>
-      </div>
-    </div>
-
-    <!-- Quality Breakdown -->
-    <div class="chart-card">
-      <h3>Quality Breakdown</h3>
-      <div class="quality-bars">
-        {_quality_bar("Commit Message", avg_msg, "25%")}
-        {_quality_bar("Change Size", avg_size, "30%")}
-        {_quality_bar("Test Coverage", avg_test, "30%")}
-        {_quality_bar("Documentation", avg_doc, "15%")}
-      </div>
-
-      <h3 style="margin-top:32px">Score Distribution</h3>
-      <div class="quality-bars" style="margin-top:8px">
-        {_score_distribution(scores)}
-      </div>
+      <div class="section-label" style="margin-top:28px">Confidence</div>
+      <ul class="conf-list">
+        <li><div class="conf-dot" style="background:var(--green)"></div> Confirmed <strong style="margin-left:auto">{confirmed}</strong></li>
+        <li><div class="conf-dot" style="background:var(--amber)"></div> High <strong style="margin-left:auto">{high}</strong></li>
+        <li><div class="conf-dot" style="background:var(--text-tertiary)"></div> Medium <strong style="margin-left:auto">{medium}</strong></li>
+      </ul>
     </div>
   </div>
 
-  <!-- Commits Table -->
-  <div class="table-card">
-    <h3>AI-Authored Commits</h3>
-    <div style="overflow-x:auto">
+  <div class="table-section">
+    <div class="section-label">All AI-Authored Commits</div>
+    <div class="table-wrap">
     <table>
       <thead>
         <tr>
-          <th>Date</th><th>Hash</th><th>Model</th><th>Message</th>
-          <th>Grade</th><th>Score</th><th>Diff</th><th>Confidence</th>
+          <th>Date</th>
+          <th>Hash</th>
+          <th>Model</th>
+          <th>Commit Message</th>
+          <th>Grade</th>
+          <th>Score</th>
+          <th>Diff</th>
+          <th>Conf.</th>
         </tr>
       </thead>
       <tbody id="commits-body"></tbody>
@@ -332,26 +473,34 @@ def generate_html(
     </div>
   </div>
 
-  <div class="footer">
-    Generated by <a href="https://github.com/hyunseung1119/forensic">git-forensic</a> — AI Code Quality Auditor
-  </div>
+  <footer class="footer">
+    <p>Generated by <a href="https://github.com/hyunseung1119/forensic">git-forensic</a> &middot; AI Code Quality Auditor</p>
+  </footer>
 </div>
 
 <script>
 const commits = {commits_data};
 const tbody = document.getElementById('commits-body');
 commits.forEach(c => {{
-  const gradeClass = 'grade-' + c.grade.replace('+', '\\\\+');
-  const confIcon = c.confidence >= 90 ? '✅' : (c.confidence >= 70 ? '🔶' : '🔸');
+  const gc = c.score >= 80 ? 'g-high' : (c.score >= 60 ? 'g-mid' : 'g-low');
+  const confTxt = c.confidence >= 90 ? 'confirmed' : (c.confidence >= 70 ? 'high' : 'medium');
   tbody.innerHTML += `<tr>
     <td>${{c.date}}</td>
-    <td><span class="hash">${{c.hash}}</span></td>
-    <td><span class="model">${{c.model}}</span></td>
+    <td><span class="hash-link">${{c.hash}}</span></td>
+    <td><span class="model-tag">${{c.model}}</span></td>
     <td>${{c.message}}</td>
-    <td><span class="grade-badge ${{gradeClass}}">${{c.grade}}</span></td>
-    <td>${{c.score.toFixed(0)}}</td>
-    <td><span class="diff-plus">+${{c.insertions}}</span> <span class="diff-minus">-${{c.deletions}}</span></td>
-    <td><span class="conf">${{confIcon}} ${{c.confidence}}%</span></td>
+    <td><span class="grade-tag ${{gc}}">${{c.grade}}</span></td>
+    <td class="score-cell">
+      ${{c.score.toFixed(0)}}
+      <div class="score-tip">
+        <div class="tip-row"><span>Commit Msg</span><span>${{c.msg_score}}</span></div>
+        <div class="tip-row"><span>Change Size</span><span>${{c.size_score}}</span></div>
+        <div class="tip-row"><span>Test Coverage</span><span>${{c.test_score}}</span></div>
+        <div class="tip-row"><span>Documentation</span><span>${{c.doc_score}}</span></div>
+      </div>
+    </td>
+    <td><span class="diff"><span class="plus">+${{c.insertions}}</span> <span class="minus">-${{c.deletions}}</span></span></td>
+    <td><span class="conf-badge">${{confTxt}}</span></td>
   </tr>`;
 }});
 </script>
@@ -372,38 +521,15 @@ def export_html(
         f.write(html)
 
 
-def _quality_bar(label: str, value: float, weight: str) -> str:
-    color = "#3fb950" if value >= 70 else ("#d29922" if value >= 50 else "#f85149")
-    return f"""<div class="q-row">
-      <span class="q-label">{label}</span>
-      <div class="q-track">
-        <div class="q-fill" style="width:{value}%;background:{color}">{value:.0f}</div>
+def _q_item(label: str, value: float, weight: str) -> str:
+    level = "good" if value >= 70 else ("warn" if value >= 50 else "bad")
+    return f"""<div class="q-item">
+      <div class="q-header">
+        <span class="q-name">{label}<span class="q-weight"> ({weight})</span></span>
+        <span class="q-score {level}">{value:.0f}</span>
       </div>
-      <span class="q-weight">{weight}</span>
+      <div class="q-track"><div class="q-fill {level}" style="width:{value}%"></div></div>
     </div>"""
-
-
-def _score_distribution(scores: list[QualityScore]) -> str:
-    """Generate score distribution bars (A+/A/B/C/D/F)."""
-    counts = {"A+": 0, "A": 0, "B": 0, "C": 0, "D": 0, "F": 0}
-    for s in scores:
-        counts[s.grade] = counts.get(s.grade, 0) + 1
-    total = len(scores) or 1
-
-    colors = {"A+": "#3fb950", "A": "#3fb950", "B": "#d29922", "C": "#d29922", "D": "#f85149", "F": "#f85149"}
-    rows = []
-    for grade in ["A+", "A", "B", "C", "D", "F"]:
-        c = counts[grade]
-        pct = c / total * 100
-        if c > 0:
-            rows.append(f"""<div class="q-row">
-              <span class="q-label">{grade} ({c})</span>
-              <div class="q-track">
-                <div class="q-fill" style="width:{pct}%;background:{colors[grade]}">{c}</div>
-              </div>
-              <span class="q-weight">{pct:.0f}%</span>
-            </div>""")
-    return "\n".join(rows)
 
 
 def _grade(score: float) -> str:
@@ -416,4 +542,8 @@ def _grade(score: float) -> str:
 
 
 def _grade_css_color(grade: str) -> str:
-    return {"A+": "#3fb950", "A": "#3fb950", "B": "#d29922", "C": "#d29922", "D": "#f85149", "F": "#f85149"}.get(grade, "#8b949e")
+    return {
+        "A+": "#15803d", "A": "#15803d",
+        "B": "#b45309", "C": "#b45309",
+        "D": "#dc2626", "F": "#dc2626",
+    }.get(grade, "#78716c")
